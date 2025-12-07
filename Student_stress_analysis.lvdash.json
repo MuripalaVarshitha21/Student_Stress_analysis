@@ -1,0 +1,633 @@
+{
+  "datasets": [
+    {
+      "name": "825acabf",
+      "displayName": "counters",
+      "queryLines": [
+        "SELECT\r\n",
+        "  COUNT(*) AS total_students,\r\n",
+        "  ROUND(AVG(stress_level),2) AS avg_stress_level,\r\n",
+        "  ROUND(MAX(risk_score),2) AS max_risk_score\r\n",
+        "FROM student_stress_clean;"
+      ],
+      "catalog": "workspace",
+      "schema": "students_stress"
+    },
+    {
+      "name": "24aa2d57",
+      "displayName": "q4_extracurricular_vs_stress",
+      "queryLines": [
+        "SELECT\r\n",
+        "  extracurricular_freq,\r\n",
+        "  COUNT(*) AS num_students,\r\n",
+        "  ROUND(AVG(stress_level), 2) AS avg_stress_level\r\n",
+        "FROM student_stress_clean\r\n",
+        "GROUP BY extracurricular_freq\r\n",
+        "ORDER BY extracurricular_freq;\r\n"
+      ],
+      "catalog": "workspace",
+      "schema": "students_stress"
+    },
+    {
+      "name": "c0bc3899",
+      "displayName": "q5_risk_score_analysis",
+      "queryLines": [
+        "SELECT\r\n",
+        "  stress_level,\r\n",
+        "  ROUND(AVG(wellbeing_score), 2) AS avg_wellbeing_score,\r\n",
+        "  ROUND(AVG(academic_stress_index), 2) AS avg_academic_stress_index,\r\n",
+        "  ROUND(AVG(risk_score), 2) AS avg_risk_score\r\n",
+        "FROM student_stress_clean\r\n",
+        "GROUP BY stress_level\r\n",
+        "ORDER BY stress_level;\r\n"
+      ],
+      "catalog": "workspace",
+      "schema": "students_stress"
+    },
+    {
+      "name": "296e2ec0",
+      "displayName": "funnel chart",
+      "queryLines": [
+        "SELECT\r\n",
+        "  'Total Students' AS stage, COUNT(*) AS total\r\n",
+        "FROM student_stress_clean\r\n",
+        "UNION ALL\r\n",
+        "SELECT 'High Study Load', COUNT(*)\r\n",
+        "FROM student_stress_clean\r\n",
+        "WHERE study_load >= 4\r\n",
+        "UNION ALL\r\n",
+        "SELECT 'Poor Sleep', COUNT(*)\r\n",
+        "FROM student_stress_clean\r\n",
+        "WHERE sleep_quality <= 2\r\n",
+        "UNION ALL\r\n",
+        "SELECT 'High Stress', COUNT(*)\r\n",
+        "FROM student_stress_clean\r\n",
+        "WHERE stress_level >= 4;\r\n"
+      ],
+      "catalog": "workspace",
+      "schema": "students_stress"
+    },
+    {
+      "name": "e764dda6",
+      "displayName": "filters",
+      "queryLines": [
+        "SELECT\r\n",
+        "  DISTINCT stress_level,\r\n",
+        "  sleep_quality,\r\n",
+        "  study_load,\r\n",
+        "  extracurricular_freq\r\n",
+        "FROM\r\n",
+        "  student_stress_clean;\r\n"
+      ],
+      "catalog": "workspace",
+      "schema": "students_stress"
+    }
+  ],
+  "pages": [
+    {
+      "name": "450f12a7",
+      "displayName": "Stress_insights",
+      "layout": [
+        {
+          "widget": {
+            "name": "7188e373",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "24aa2d57",
+                  "fields": [
+                    {
+                      "name": "sum(avg_stress_level)",
+                      "expression": "SUM(`avg_stress_level`)"
+                    },
+                    {
+                      "name": "extracurricular_freq",
+                      "expression": "`extracurricular_freq`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "pie",
+              "encodings": {
+                "angle": {
+                  "fieldName": "sum(avg_stress_level)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "extracurricular_freq",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "plasma"
+                    }
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Impact of Extracurricular Activities on Student Stress Levels"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "769c82ee",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c0bc3899",
+                  "fields": [
+                    {
+                      "name": "stress_level",
+                      "expression": "`stress_level`"
+                    },
+                    {
+                      "name": "avg_risk_score",
+                      "expression": "`avg_risk_score`"
+                    },
+                    {
+                      "name": "avg_academic_stress_index",
+                      "expression": "`avg_academic_stress_index`"
+                    },
+                    {
+                      "name": "avg_wellbeing_score",
+                      "expression": "`avg_wellbeing_score`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "scatter",
+              "encodings": {
+                "x": {
+                  "fieldName": "avg_academic_stress_index",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "avg_wellbeing_score",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "stress_level",
+                  "scale": {
+                    "type": "quantitative",
+                    "colorRamp": {
+                      "mode": "scheme",
+                      "scheme": "orangered"
+                    }
+                  }
+                },
+                "size": {
+                  "fieldName": "avg_risk_score",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Stress Risk Analysis: Wellbeing vs Academic Pressure"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "16189e40",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "296e2ec0",
+                  "fields": [
+                    {
+                      "name": "sum(total)",
+                      "expression": "SUM(`total`)"
+                    },
+                    {
+                      "name": "stage",
+                      "expression": "`stage`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 3,
+              "widgetType": "funnel",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(total)",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "stage",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Student Stress Pipeline: From Workload to High Stress Levels"
+              },
+              "mark": {
+                "colors": [
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 2
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 3
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 4
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 5
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 6
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 7
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 8
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 9
+                  },
+                  {
+                    "themeColorType": "visualizationColors",
+                    "position": 10
+                  }
+                ]
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 18,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "f0d0eaf6",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "825acabf",
+                  "fields": [
+                    {
+                      "name": "avg_stress_level",
+                      "expression": "`avg_stress_level`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "avg_stress_level"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Average Student Stress Level"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "fc156a54",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "825acabf",
+                  "fields": [
+                    {
+                      "name": "total_students",
+                      "expression": "`total_students`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "total_students"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Total Number of Students in Dataset"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "0eaaed3d",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "825acabf",
+                  "fields": [
+                    {
+                      "name": "max_risk_score",
+                      "expression": "`max_risk_score`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "max_risk_score"
+                }
+              },
+              "frame": {
+                "showTitle": true,
+                "title": "Highest Detected Stress Risk Score"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 6,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS"
+    },
+    {
+      "name": "5f5568e4",
+      "displayName": "Global Filters",
+      "layout": [
+        {
+          "widget": {
+            "name": "6d575317",
+            "queries": [
+              {
+                "name": "dashboards/01f0cd5b70ca17f2b0d0c811560ff3b5/datasets/01f0cd6b6a301582b3ed1fcada4b6ecd_extracurricular_freq",
+                "query": {
+                  "datasetName": "e764dda6",
+                  "fields": [
+                    {
+                      "name": "extracurricular_freq",
+                      "expression": "`extracurricular_freq`"
+                    },
+                    {
+                      "name": "extracurricular_freq_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "extracurricular_freq",
+                    "queryName": "dashboards/01f0cd5b70ca17f2b0d0c811560ff3b5/datasets/01f0cd6b6a301582b3ed1fcada4b6ecd_extracurricular_freq"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "9a205b2c",
+            "queries": [
+              {
+                "name": "dashboards/01f0cd5b70ca17f2b0d0c811560ff3b5/datasets/01f0cd6b6a301582b3ed1fcada4b6ecd_study_load",
+                "query": {
+                  "datasetName": "e764dda6",
+                  "fields": [
+                    {
+                      "name": "study_load",
+                      "expression": "`study_load`"
+                    },
+                    {
+                      "name": "study_load_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "study_load",
+                    "queryName": "dashboards/01f0cd5b70ca17f2b0d0c811560ff3b5/datasets/01f0cd6b6a301582b3ed1fcada4b6ecd_study_load"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "e039e35e",
+            "queries": [
+              {
+                "name": "dashboards/01f0cd5b70ca17f2b0d0c811560ff3b5/datasets/01f0cd6b6a301582b3ed1fcada4b6ecd_sleep_quality",
+                "query": {
+                  "datasetName": "e764dda6",
+                  "fields": [
+                    {
+                      "name": "sleep_quality",
+                      "expression": "`sleep_quality`"
+                    },
+                    {
+                      "name": "sleep_quality_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "sleep_quality",
+                    "queryName": "dashboards/01f0cd5b70ca17f2b0d0c811560ff3b5/datasets/01f0cd6b6a301582b3ed1fcada4b6ecd_sleep_quality"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 1,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "f20bb051",
+            "queries": [
+              {
+                "name": "dashboards/01f0cd5b70ca17f2b0d0c811560ff3b5/datasets/01f0cd6b6a301582b3ed1fcada4b6ecd_stress_level",
+                "query": {
+                  "datasetName": "e764dda6",
+                  "fields": [
+                    {
+                      "name": "stress_level",
+                      "expression": "`stress_level`"
+                    },
+                    {
+                      "name": "stress_level_associativity",
+                      "expression": "COUNT_IF(`associative_filter_predicate_group`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "version": 2,
+              "widgetType": "filter-single-select",
+              "encodings": {
+                "fields": [
+                  {
+                    "fieldName": "stress_level",
+                    "queryName": "dashboards/01f0cd5b70ca17f2b0d0c811560ff3b5/datasets/01f0cd6b6a301582b3ed1fcada4b6ecd_stress_level"
+                  }
+                ]
+              },
+              "frame": {
+                "showTitle": true
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 1,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_GLOBAL_FILTERS"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
